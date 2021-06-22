@@ -52,7 +52,8 @@ public:
    * \param ff_term_cmd A pointer to the storage for this actuator's FF term command
    */
   ActuatorHandle(const ActuatorStateHandle& as, double* cmd,
-                 std::vector<double>* pid_gains_cmd = nullptr, double* ff_term_cmd = nullptr)
+                 std::vector<std::vector<double>>* pid_gains_cmd = nullptr,
+                 std::vector<double>* ff_term_cmd = nullptr)
     : ActuatorStateHandle(as), cmd_(cmd), pid_gains_cmd_(pid_gains_cmd), ff_term_cmd_(ff_term_cmd)
   {
     if (!cmd_)
@@ -60,10 +61,18 @@ public:
       throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
                                        "'. Command data pointer is null.");
     }
-    if(pid_gains_cmd_ && (*pid_gains_cmd_).size() != 3)
+    if(pid_gains_cmd_ && pid_gains_cmd_->size() != 3)
     {
       throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
-                                       "'. The parsed PID gains command pointer is not of size 3.");
+                                       "'. The parsed PID gains command pointer is not of size corresponding to modes size (3).");
+    }
+    for(const std::vector<double> &pids : *pid_gains_cmd_)
+    {
+      if (pids.size() != 3)
+      {
+        throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
+                                         "'. The parsed PID gains command is not of size 3.");
+      }
     }
   }
 
@@ -74,52 +83,53 @@ public:
 
   // Methods for setting and getting the gains information
 
-  void setPIDGainsCmd(double p_gain, double i_gain, double d_gain)
+  void setPIDGainsCmd(const std::vector<std::vector<double>> &modePIDs)
   {
     assert(pid_gains_cmd_);
-    (*pid_gains_cmd_)[0] = p_gain;
-    (*pid_gains_cmd_)[1] = i_gain;
-    (*pid_gains_cmd_)[2] = d_gain;
+    assert(pid_gains_cmd_->size() == modePIDs.size());
+    for(size_t i = 0; i < modePIDs.size(); i++)
+    {
+      assert(modePIDs[i].size() == 3);
+      (*pid_gains_cmd_)[i] = modePIDs[i];
+    }
   }
 
-  void getPIDGainsCmd(double& p_gain, double& i_gain, double& d_gain) const
+  void getPIDGainsCmd(std::vector<std::vector<double>> &modePIDs) const
   {
     assert(pid_gains_cmd_);
     if (!pid_gains_cmd_)
     {
       throw std::runtime_error("Actuator : " + getName() + "does not support PID gains");
     }
-    p_gain = (*pid_gains_cmd_)[0];
-    i_gain = (*pid_gains_cmd_)[1];
-    d_gain = (*pid_gains_cmd_)[2];
+    modePIDs = *pid_gains_cmd_;
   }
 
-  const std::vector<double>* getPIDGainsCmdConstPtr() const
+  const std::vector<std::vector<double>>* getPIDGainsCmdConstPtr() const
   {
     return pid_gains_cmd_;
   }
 
-  void setFFTermCmd(double ff_gain)
+  void setFFTermCmd(const std::vector<double>& ff_gain)
   {
     assert(ff_term_cmd_);
     *ff_term_cmd_ = ff_gain;
   }
 
-  double getFFTermCmd() const
+  std::vector<double> getFFTermCmd() const
   {
     assert(ff_term_cmd_);
     return *ff_term_cmd_;
   }
 
-  const double* getFFTermCmdConstPtr() const
+  const std::vector<double>* getFFTermCmdConstPtr() const
   {
     return ff_term_cmd_;
   }
 
 private:
   double* cmd_;
-  std::vector<double>* pid_gains_cmd_;
-  double* ff_term_cmd_;
+  std::vector<std::vector<double>>* pid_gains_cmd_;
+  std::vector<double>* ff_term_cmd_;
 };
 
 /** \brief Hardware interface to support commanding an array of actuators.
