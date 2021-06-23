@@ -94,14 +94,26 @@ public:
     }
   }
 
-  void getPIDGainsCmd(std::vector<std::vector<double>> &modePIDs) const
+  void setPIDGainsCmd(const std::vector<double> &modePIDs, unsigned int mode)
+  {
+    assert(pid_gains_cmd_);
+    assert(mode < pid_gains_cmd_->size());
+    for(size_t i = 0; i < modePIDs.size(); i++)
+    {
+      assert(modePIDs.size() == (*pid_gains_cmd_)[mode].size());
+      assert(modePIDs.size() == 3);
+      (*pid_gains_cmd_)[mode][i] = modePIDs[i];
+    }
+  }
+
+  std::vector<std::vector<double>> getPIDGainsCmd() const
   {
     assert(pid_gains_cmd_);
     if (!pid_gains_cmd_)
     {
       throw std::runtime_error("Actuator : " + getName() + "does not support PID gains");
     }
-    modePIDs = *pid_gains_cmd_;
+    return *pid_gains_cmd_;
   }
 
   const std::vector<std::vector<double>>* getPIDGainsCmdConstPtr() const
@@ -113,6 +125,13 @@ public:
   {
     assert(ff_term_cmd_);
     *ff_term_cmd_ = ff_gain;
+  }
+
+  void setFFTermCmd(double ff_gain, unsigned int mode)
+  {
+    assert(ff_term_cmd_);
+    assert(mode < ff_term_cmd_->size());
+    (*ff_term_cmd_)[mode] = ff_gain;
   }
 
   std::vector<double> getFFTermCmd() const

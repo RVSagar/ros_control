@@ -89,7 +89,7 @@ public:
   double getVelocity()  const {assert(vel_); return *vel_;}
   double getEffort()    const {assert(eff_); return *eff_;}
   std::vector<double> getFFTerm()    const {assert(ff_term_); return *ff_term_;}
-  std::vector<std::vector<double>> getPIDGains(double& p_gain, double& i_gain, double& d_gain) const
+  std::vector<std::vector<double>> getPIDGains() const
   {
     assert(pid_gains_);
     return *pid_gains_;
