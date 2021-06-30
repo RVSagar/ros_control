@@ -66,13 +66,21 @@ public:
       throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
                                        "'. The parsed PID gains command pointer is not of size corresponding to modes size (3).");
     }
-    for(const std::vector<double> &pids : *pid_gains_cmd_)
+    if(pid_gains_cmd_)
     {
-      if (pids.size() != 3)
+      for (const std::vector<double>& pids : *pid_gains_cmd_)
       {
-        throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
-                                         "'. The parsed PID gains command is not of size 3.");
+        if (pids.size() != 3)
+        {
+          throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
+                                           "'. The parsed PID gains command is not of size 3.");
+        }
       }
+    }
+    if (pid_gains_cmd_ && ff_term_cmd_ && pid_gains_cmd_->size() != ff_term_cmd_->size())
+    {
+      throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
+                                       "'. The parsed PID gains and FF Term are not of same size.");
     }
   }
 
