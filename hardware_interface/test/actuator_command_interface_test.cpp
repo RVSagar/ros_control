@@ -40,15 +40,17 @@ TEST(ActuatorCommandHandleTest, HandleConstruction)
   string name = "name1";
   double pos, vel, eff;
   double cmd;
-  std::vector<double> pids_good(3, std::numeric_limits<double>::quiet_NaN());
-  std::vector<double> pids_bad_1(2, std::numeric_limits<double>::quiet_NaN());
-  std::vector<double> pids_bad_2(4, std::numeric_limits<double>::quiet_NaN());
-  double ff_term;
+  std::vector<std::vector<double>> pids_good(3, std::vector<double>(3, std::numeric_limits<double>::quiet_NaN()));
+  std::vector<std::vector<double>> pids_bad_1(2, std::vector<double>(3, std::numeric_limits<double>::quiet_NaN()));
+  std::vector<std::vector<double>> pids_bad_2(3, std::vector<double>(4, std::numeric_limits<double>::quiet_NaN()));
+  std::vector<double> ff_term(3, std::numeric_limits<double>::quiet_NaN());
+  std::vector<double> ff_term_bad(2, std::numeric_limits<double>::quiet_NaN());
   EXPECT_NO_THROW(ActuatorHandle tmp(ActuatorStateHandle(name, &pos, &vel, &eff), &cmd));
   EXPECT_THROW(ActuatorHandle tmp(ActuatorStateHandle(name, &pos, &vel, &eff), 0), HardwareInterfaceException);
   EXPECT_THROW(ActuatorHandle tmp(ActuatorStateHandle(name, &pos, &vel, &eff), &cmd, &pids_bad_1), HardwareInterfaceException);
   EXPECT_THROW(ActuatorHandle tmp(ActuatorStateHandle(name, &pos, &vel, &eff), &cmd, &pids_bad_2), HardwareInterfaceException);
   EXPECT_THROW(ActuatorHandle tmp(ActuatorStateHandle(name, &pos, &vel, &eff), &cmd, &pids_bad_2, &ff_term), HardwareInterfaceException);
+  EXPECT_THROW(ActuatorHandle tmp(ActuatorStateHandle(name, &pos, &vel, &eff), &cmd, &pids_good, &ff_term_bad), HardwareInterfaceException);
   EXPECT_NO_THROW(ActuatorHandle tmp(ActuatorStateHandle(name, &pos, &vel, &eff), &cmd, &pids_good, &ff_term));
   // We don't throw exception in case the FF term info is not set
   EXPECT_NO_THROW(ActuatorHandle tmp(ActuatorStateHandle(name, &pos, &vel, &eff), &cmd, &pids_good, 0));
@@ -71,9 +73,11 @@ TEST(ActuatorStateHandleTest, AssertionTriggering)
   EXPECT_DEATH(h.getEffort(),     ".*");
   EXPECT_DEATH(h.getCommand(),    ".*");
   EXPECT_DEATH(h.setCommand(1.0), ".*");
-  EXPECT_DEATH(h.setPIDGainsCmd(1.0, 0.001, 0.1), ".*");
-  EXPECT_DEATH(h.getPIDGainsCmd(act_p_gain, act_i_gain, act_d_gain), ".*");
-  EXPECT_DEATH(h.setFFTermCmd(1.0), ".*");
+  EXPECT_DEATH(h.setFFTermCmd({ 0., 0., 0., 0. }), ".*");
+  EXPECT_DEATH(h.setFFTermCmd(10.0, 5), ".*");
+  EXPECT_DEATH(h.setPIDGainsCmd({ 0., 0., 0., 0. }, 2), ".*");
+  EXPECT_DEATH(h.setPIDGainsCmd({ { 0., 0., 0. }, { 0., 0., 0. }, { 0., 0. } }), ".*");
+  EXPECT_DEATH(h.setPIDGainsCmd({ 0., 0., 0., 0. }, 10), ".*");
   EXPECT_DEATH(h.getFFTermCmd(), ".*");
   EXPECT_FALSE(h.getFFTermCmdConstPtr());
   EXPECT_FALSE(h.getPIDGainsCmdConstPtr());
@@ -86,8 +90,8 @@ public:
   ActuatorCommandInterfaceTest()
     : pos1(1.0), vel1(2.0), eff1(3.0), cmd1(0.0),
       pos2(4.0), vel2(5.0), eff2(6.0), cmd2(0.0),
-      pids(3, std::numeric_limits<double>::quiet_NaN()),
-      ff_term(std::numeric_limits<double>::quiet_NaN()),
+      pids(3, std::vector<double>(3, std::numeric_limits<double>::quiet_NaN())),
+      ff_term(3, std::numeric_limits<double>::quiet_NaN()),
       name1("name_1"),
       name2("name_2"),
       hs1(name1, &pos1, &vel1, &eff1),
@@ -99,8 +103,8 @@ public:
 protected:
   double pos1, vel1, eff1, cmd1;
   double pos2, vel2, eff2, cmd2;
-  std::vector<double> pids;
-  double ff_term;
+  std::vector<std::vector<double>> pids;
+  std::vector<double> ff_term;
   string name1;
   string name2;
   ActuatorStateHandle hs1, hs2;
@@ -133,31 +137,54 @@ TEST_F(ActuatorCommandInterfaceTest, ExcerciseApi)
   EXPECT_DOUBLE_EQ(new_cmd_1, hc1_tmp.getCommand());
 
   // By default it is zero
-  EXPECT_TRUE(std::isnan(hc1_tmp.getFFTermCmd()));
-  const double new_ff_gain = 10.0;
-  hc1_tmp.setFFTermCmd(new_ff_gain);
-  EXPECT_DOUBLE_EQ(new_ff_gain, *hc1_tmp.getFFTermCmdConstPtr());
+  EXPECT_EQ(3, hc1_tmp.getFFTermCmd().size());
+  EXPECT_TRUE(std::isnan(hc1_tmp.getFFTermCmd()[0]));
+  EXPECT_TRUE(std::isnan(hc1_tmp.getFFTermCmd()[1]));
+  EXPECT_TRUE(std::isnan(hc1_tmp.getFFTermCmd()[2]));
+  hc1_tmp.setFFTermCmd({ 0., std::numeric_limits<double>::quiet_NaN(), 10.0 });
+  EXPECT_DOUBLE_EQ(0., (*hc1_tmp.getFFTermCmdConstPtr())[0]);
+  EXPECT_TRUE(std::isnan((*hc1_tmp.getFFTermCmdConstPtr())[1]));
+  EXPECT_DOUBLE_EQ(10., (*hc1_tmp.getFFTermCmdConstPtr())[2]);
 
-  const std::vector<double>* pid_gains = hc1_tmp.getPIDGainsCmdConstPtr();
+  // Mode 1 can be velocity
+  hc1_tmp.setFFTermCmd(11.0, 1);
+  EXPECT_FALSE(std::isnan((*hc1_tmp.getFFTermCmdConstPtr())[1]));
+  EXPECT_DOUBLE_EQ(11., (*hc1_tmp.getFFTermCmdConstPtr())[1]);
+
+  const std::vector<std::vector<double>>* pid_gains = hc1_tmp.getPIDGainsCmdConstPtr();
   // Default values of the gains
   EXPECT_EQ(3, (*pid_gains).size());
-  EXPECT_TRUE(std::isnan((*pid_gains)[0]));
-  EXPECT_TRUE(std::isnan((*pid_gains)[1]));
-  EXPECT_TRUE(std::isnan((*pid_gains)[2]));
+  for (size_t i = 0; i < (*pid_gains).size(); i++)
+  {
+    EXPECT_TRUE(std::isnan((*pid_gains)[i][0]));
+    EXPECT_TRUE(std::isnan((*pid_gains)[i][1]));
+    EXPECT_TRUE(std::isnan((*pid_gains)[i][2]));
+  }
   // Now change the values of the gains
   const double new_p_gain = 1000.0;
   const double new_i_gain = 1.0;
   const double new_d_gain = 10.0;
-  hc1_tmp.setPIDGainsCmd(new_p_gain, new_i_gain, new_d_gain);
-  EXPECT_DOUBLE_EQ(new_p_gain, (*pid_gains)[0]);
-  EXPECT_DOUBLE_EQ(new_i_gain, (*pid_gains)[1]);
-  EXPECT_DOUBLE_EQ(new_d_gain, (*pid_gains)[2]);
+  hc1_tmp.setPIDGainsCmd({ new_p_gain, new_i_gain, new_d_gain }, 1);
+  EXPECT_DOUBLE_EQ(new_p_gain, (*pid_gains)[1][0]);
+  EXPECT_DOUBLE_EQ(new_i_gain, (*pid_gains)[1][1]);
+  EXPECT_DOUBLE_EQ(new_d_gain, (*pid_gains)[1][2]);
+  for (size_t i : { 0, 2 })
+  {
+    EXPECT_TRUE(std::isnan((*pid_gains)[i][0]));
+    EXPECT_TRUE(std::isnan((*pid_gains)[i][1]));
+    EXPECT_TRUE(std::isnan((*pid_gains)[i][2]));
+  }
   // Test the same with other methods
-  double act_p_gain, act_i_gain, act_d_gain;
-  hc1_tmp.getPIDGainsCmd(act_p_gain, act_i_gain, act_d_gain);
-  EXPECT_DOUBLE_EQ(new_p_gain, act_p_gain);
-  EXPECT_DOUBLE_EQ(new_i_gain, act_i_gain);
-  EXPECT_DOUBLE_EQ(new_d_gain, act_d_gain);
+  std::vector<std::vector<double>> act_pids = hc1_tmp.getPIDGainsCmd();
+  EXPECT_DOUBLE_EQ(new_p_gain, act_pids[1][0]);
+  EXPECT_DOUBLE_EQ(new_i_gain, act_pids[1][1]);
+  EXPECT_DOUBLE_EQ(new_d_gain, act_pids[1][2]);
+  for (size_t i : { 0, 2 })
+  {
+    EXPECT_TRUE(std::isnan(pids[i][0]));
+    EXPECT_TRUE(std::isnan(pids[i][1]));
+    EXPECT_TRUE(std::isnan(pids[i][2]));
+  }
 
   ActuatorHandle hc2_tmp = iface.getHandle(name2);
   EXPECT_EQ(name2, hc2_tmp.getName());
