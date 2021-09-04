@@ -67,6 +67,9 @@ Changelog for package ros_control
 0.4.1 (2021-05-06)
 ------------------
 
+Forthcoming
+-----------
+
 0.9.3 (2015-05-05)
 ------------------
 * Update changelogs

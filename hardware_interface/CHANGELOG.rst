@@ -154,6 +154,17 @@ Changelog for package hardware_interface
 * added the PID interfaces to the ActuatorHandle to expose to it's interfaces
 * Contributors: Jordan Palacios, Sai Kishor Kothakota
 
+Forthcoming
+-----------
+* Merge branch 'extended_pid_ffterm_interfaces' into 'erbium-devel'
+  update the new changes of multi mode PIDs and FFTerm support
+  See merge request control/ros_control!10
+* fix actuator command interface tests
+* added more checks for the PIDs and FF Term sizes
+* cleanup and added more helper methods
+* update the new changes of multi mode PIDs and FFTerm support
+* Contributors: Sai Kishor Kothakota, saikishor
+
 0.9.3 (2015-05-05)
 ------------------
 * Update changelogs

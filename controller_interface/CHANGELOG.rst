@@ -107,6 +107,9 @@ Changelog for package controller_interface
 * added methods to set the RobotHW and to retrieve the HardwareInterface pointer
 * Contributors: Jordan Palacios, Sai Kishor Kothakota
 
+Forthcoming
+-----------
+
 0.9.3 (2015-05-05)
 ------------------
 * Update changelogs

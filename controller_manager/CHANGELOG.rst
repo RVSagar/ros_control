@@ -117,6 +117,9 @@ Changelog for package controller_manager
 * add c++11 compilation option
 * Contributors: Jordan Palacios, Sai Kishor Kothakota
 
+Forthcoming
+-----------
+
 0.9.3 (2015-05-05)
 ------------------
 * Update changelogs
