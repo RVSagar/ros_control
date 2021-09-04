@@ -53,8 +53,8 @@ public:
   ActuatorStateHandle(const std::string& name, const double* pos, const double* vel,
                       const double* eff, const double* absolute_pos = nullptr,
                       const double* torque_sensor = nullptr,
-                      const std::vector<double>* pid_gains = nullptr,
-                      const double* ff_term = nullptr)
+                      const std::vector<std::vector<double>>* pid_gains = nullptr,
+                      const std::vector<double>* ff_term = nullptr)
     : name_(name)
     , pos_(pos)
     , vel_(vel)
@@ -88,16 +88,11 @@ public:
   double getPosition()  const {assert(pos_); return *pos_;}
   double getVelocity()  const {assert(vel_); return *vel_;}
   double getEffort()    const {assert(eff_); return *eff_;}
-  double getFFTerm()    const {assert(ff_term_); return *ff_term_;}
-  void getPIDGains(double& p_gain, double& i_gain, double& d_gain) const
+  std::vector<double> getFFTerm()    const {assert(ff_term_); return *ff_term_;}
+  std::vector<std::vector<double>> getPIDGains() const
   {
     assert(pid_gains_);
-    if(!pid_gains_){
-      throw std::runtime_error("Actuator does not support PID gains");
-    }
-    p_gain = (*pid_gains_)[0];
-    i_gain = (*pid_gains_)[1];
-    d_gain = (*pid_gains_)[2];
+    return *pid_gains_;
   }
   double getAbsolutePosition() const {
     assert(absolute_pos_);
@@ -117,8 +112,8 @@ public:
   const double* getPositionPtr() const {return pos_;}
   const double* getVelocityPtr() const {return vel_;}
   const double* getEffortPtr()   const {return eff_;}
-  const std::vector<double>* getPIDGainsPtr() const {return pid_gains_;}
-  const double* getFFTermPtr()   const {return ff_term_;}
+  const std::vector<std::vector<double>>* getPIDGainsPtr() const {return pid_gains_;}
+  const std::vector<double>* getFFTermPtr()   const {return ff_term_;}
   const double* getAbsolutePositionPtr() const {
     if(!absolute_pos_){
      throw std::runtime_error("Actuator does not support absolute encoders");
@@ -157,8 +152,8 @@ private:
   const double* eff_;
   const double* absolute_pos_;
   const double* torque_sensor_;
-  const std::vector<double>* pid_gains_;
-  const double* ff_term_;
+  const std::vector<std::vector<double>>* pid_gains_;
+  const std::vector<double>* ff_term_;
 };
 
 /** \brief Hardware interface to support reading the state of an array of actuators
