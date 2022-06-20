@@ -82,7 +82,13 @@ public:
           "Cannot create handle '" + name + "'. The parsed PID gains pointer is of size: " +
           std::to_string(pid_gains_->size()) + ". Expected size : 5");
     }
-
+    if (pid_gains_ && ff_term_ && pid_gains_->size() != ff_term_->size())
+    {
+      throw HardwareInterfaceException(
+          "Cannot create handle '" + name + "'. The parsed PID gains(" +
+          std::to_string(pid_gains_->size()) + ") and FF Term(" +
+          std::to_string(ff_term_->size()) + ") are not of same size.");
+    }
   }
 
   std::string getName() const {return name_;}
@@ -143,6 +149,24 @@ public:
     }
     else{
       return true;
+    }
+  }
+
+  bool hasPIDGains() const{
+    if(!pid_gains_){
+        return false;
+    }
+    else{
+        return true;
+    }
+  }
+
+  bool hasFFTerm() const{
+    if(!ff_term_){
+        return false;
+    }
+    else{
+        return true;
     }
   }
 

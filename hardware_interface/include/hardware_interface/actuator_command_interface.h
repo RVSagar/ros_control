@@ -81,8 +81,10 @@ public:
     }
     if (pid_gains_cmd_ && ff_term_cmd_ && pid_gains_cmd_->size() != ff_term_cmd_->size())
     {
-      throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
-                                       "'. The parsed PID gains and FF Term are not of same size.");
+      throw HardwareInterfaceException(
+          "Cannot create handle '" + as.getName() + "'. The parsed PID gains(" +
+          std::to_string(pid_gains_cmd_->size()) + ") and FF Term(" +
+          std::to_string(ff_term_cmd_->size()) + ") are not of same size.");
     }
   }
 
