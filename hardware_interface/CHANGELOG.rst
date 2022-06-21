@@ -156,6 +156,13 @@ Changelog for package hardware_interface
 
 Forthcoming
 -----------
+* Merge branch 'new_modes_fix' into 'erbium-devel'
+  added a proper throw message for easy introspection
+  See merge request control/ros_control!12
+* added more introspection exceptions and new methods for checking existance of gains
+* added a proper throw message for easy introspection
+* Contributors: Sai Kishor Kothakota, saikishor
+
 * Merge branch 'extended_pid_ffterm_interfaces' into 'erbium-devel'
   update the new changes of multi mode PIDs and FFTerm support
   See merge request control/ros_control!10
