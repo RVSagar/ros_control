@@ -57,7 +57,15 @@ public:
     }
   }
 
-  void setCommand(double command) {assert(cmd_); *cmd_ = command;}
+  void setCommand(double command) 
+  {
+    assert(cmd_);
+    if(!std::isfinite(command))
+    {
+      throw std::runtime_error("Error commanding NaN or Inf to the joint : " + getName());
+    }
+    *cmd_ = command;
+  }
   double getCommand() const {assert(cmd_); return *cmd_;}
   const double* getCommandPtr() const {assert(cmd_); return cmd_;}
 
