@@ -156,6 +156,13 @@ Changelog for package hardware_interface
 
 Forthcoming
 -----------
+* Merge branch 'finite_value_check' into 'erbium-devel'
+  Added check for the command to be a finite value
+  See merge request control/ros_control!13
+* Added tests to test the invalid data cases
+* Added check for the command to be a finite value
+* Contributors: Jordan Palacios, Sai Kishor Kothakota, saikishor
+
 * Merge branch 'new_modes_fix' into 'erbium-devel'
   added a proper throw message for easy introspection
   See merge request control/ros_control!12
