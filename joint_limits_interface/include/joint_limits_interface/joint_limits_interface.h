@@ -197,7 +197,19 @@ public:
 
     // Current position
     // TODO: Doc!
-    if (std::isnan(prev_cmd_)) {prev_cmd_ = jh_.getPosition();} // Happens only once at initialization
+    // Happens only once at initialization
+    if (std::isnan(prev_cmd_))
+    {
+      if(!std::isfinite(jh_.getPosition()))
+      {
+        return;
+      }
+      if(!std::isfinite(jh_.getCommand()))
+      {
+        jh_.setCommand(jh_.getPosition());
+      }
+      prev_cmd_ = jh_.getPosition();
+    }
     const double pos = prev_cmd_;
 
     // Velocity bounds
@@ -422,6 +434,8 @@ public:
     }
   }
 
+  void reset() {prev_cmd_ = 0.0;}
+
   /** \return Joint name. */
   std::string getName() const {return jh_.getName();}
 
@@ -436,6 +450,11 @@ public:
     // Velocity bounds
     double vel_low;
     double vel_high;
+
+    if(!std::isfinite(jh_.getCommand()))
+    {
+      jh_.setCommand(0.0);
+    }
 
     if (limits_.has_acceleration_limits)
     {
@@ -495,6 +514,11 @@ public:
   void enforceLimits(const ros::Duration& period)
   {
     using internal::saturate;
+
+    if(!std::isfinite(jh_.getCommand()))
+    {
+      jh_.setCommand(0.0);
+    }
 
     double min_vel, max_vel;
     if (limits_.has_position_limits)
