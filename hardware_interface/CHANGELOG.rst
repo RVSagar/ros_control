@@ -156,6 +156,7 @@ Changelog for package hardware_interface
 
 Forthcoming
 -----------
+
 * Merge branch 'finite_value_check' into 'erbium-devel'
   Added check for the command to be a finite value
   See merge request control/ros_control!13
