@@ -40,10 +40,10 @@ TEST(ActuatorCommandHandleTest, HandleConstruction)
   string name = "name1";
   double pos, vel, eff;
   double cmd;
-  std::vector<std::vector<double>> pids_good(3, std::vector<double>(3, std::numeric_limits<double>::quiet_NaN()));
+  std::vector<std::vector<double>> pids_good(5, std::vector<double>(3, std::numeric_limits<double>::quiet_NaN()));
   std::vector<std::vector<double>> pids_bad_1(2, std::vector<double>(3, std::numeric_limits<double>::quiet_NaN()));
   std::vector<std::vector<double>> pids_bad_2(3, std::vector<double>(4, std::numeric_limits<double>::quiet_NaN()));
-  std::vector<double> ff_term(3, std::numeric_limits<double>::quiet_NaN());
+  std::vector<double> ff_term(5, std::numeric_limits<double>::quiet_NaN());
   std::vector<double> ff_term_bad(2, std::numeric_limits<double>::quiet_NaN());
   EXPECT_NO_THROW(ActuatorHandle tmp(ActuatorStateHandle(name, &pos, &vel, &eff), &cmd));
   EXPECT_THROW(ActuatorHandle tmp(ActuatorStateHandle(name, &pos, &vel, &eff), 0), HardwareInterfaceException);
@@ -90,8 +90,8 @@ public:
   ActuatorCommandInterfaceTest()
     : pos1(1.0), vel1(2.0), eff1(3.0), cmd1(0.0),
       pos2(4.0), vel2(5.0), eff2(6.0), cmd2(0.0),
-      pids(3, std::vector<double>(3, std::numeric_limits<double>::quiet_NaN())),
-      ff_term(3, std::numeric_limits<double>::quiet_NaN()),
+      pids(5, std::vector<double>(3, std::numeric_limits<double>::quiet_NaN())),
+      ff_term(5, std::numeric_limits<double>::quiet_NaN()),
       name1("name_1"),
       name2("name_2"),
       hs1(name1, &pos1, &vel1, &eff1),
@@ -137,7 +137,7 @@ TEST_F(ActuatorCommandInterfaceTest, ExcerciseApi)
   EXPECT_DOUBLE_EQ(new_cmd_1, hc1_tmp.getCommand());
 
   // By default it is zero
-  EXPECT_EQ(3, hc1_tmp.getFFTermCmd().size());
+  EXPECT_EQ(5, hc1_tmp.getFFTermCmd().size());
   EXPECT_TRUE(std::isnan(hc1_tmp.getFFTermCmd()[0]));
   EXPECT_TRUE(std::isnan(hc1_tmp.getFFTermCmd()[1]));
   EXPECT_TRUE(std::isnan(hc1_tmp.getFFTermCmd()[2]));
@@ -153,7 +153,7 @@ TEST_F(ActuatorCommandInterfaceTest, ExcerciseApi)
 
   const std::vector<std::vector<double>>* pid_gains = hc1_tmp.getPIDGainsCmdConstPtr();
   // Default values of the gains
-  EXPECT_EQ(3, (*pid_gains).size());
+  EXPECT_EQ(5, (*pid_gains).size());
   for (size_t i = 0; i < (*pid_gains).size(); i++)
   {
     EXPECT_TRUE(std::isnan((*pid_gains)[i][0]));

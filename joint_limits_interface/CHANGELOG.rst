@@ -102,6 +102,11 @@ Changelog for package joint_limits_interface
 
 Forthcoming
 -----------
+* Merge branch 'fix-sending-nans-at-startup' into 'erbium-devel'
+  fix sending NaNs at the startup of the robot
+  See merge request control/ros_control!14
+* fix sending NaNs at the startup of the robot
+* Contributors: Jordan Palacios, Sai Kishor Kothakota
 
 0.9.3 (2015-05-05)
 ------------------

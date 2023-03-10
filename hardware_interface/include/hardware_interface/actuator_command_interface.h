@@ -61,12 +61,14 @@ public:
       throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
                                        "'. Command data pointer is null.");
     }
-    if(pid_gains_cmd_ && pid_gains_cmd_->size() != 3)
+    if (pid_gains_cmd_ && pid_gains_cmd_->size() != 5)
     {
       throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
-                                       "'. The parsed PID gains command pointer is not of size corresponding to modes size (3).");
+                                       "'. The parsed PID gains command pointer is of size : " +
+                                       std::to_string(pid_gains_cmd_->size()) +
+                                       ". Expected size : 5");
     }
-    if(pid_gains_cmd_)
+    if (pid_gains_cmd_)
     {
       for (const std::vector<double>& pids : *pid_gains_cmd_)
       {
@@ -79,8 +81,10 @@ public:
     }
     if (pid_gains_cmd_ && ff_term_cmd_ && pid_gains_cmd_->size() != ff_term_cmd_->size())
     {
-      throw HardwareInterfaceException("Cannot create handle '" + as.getName() +
-                                       "'. The parsed PID gains and FF Term are not of same size.");
+      throw HardwareInterfaceException(
+          "Cannot create handle '" + as.getName() + "'. The parsed PID gains(" +
+          std::to_string(pid_gains_cmd_->size()) + ") and FF Term(" +
+          std::to_string(ff_term_cmd_->size()) + ") are not of same size.");
     }
   }
 

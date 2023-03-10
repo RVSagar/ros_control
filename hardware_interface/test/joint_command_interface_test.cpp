@@ -106,6 +106,11 @@ TEST_F(JointCommandInterfaceTest, ExcerciseApi)
   hc1_tmp.setCommand(new_cmd_1);
   EXPECT_DOUBLE_EQ(new_cmd_1, hc1_tmp.getCommand());
 
+  // Parse Invalid intput
+  EXPECT_THROW(hc1_tmp.setCommand(std::numeric_limits<double>::quiet_NaN()), std::runtime_error);
+  EXPECT_THROW(hc1_tmp.setCommand(std::numeric_limits<double>::infinity()), std::runtime_error);
+  EXPECT_NO_THROW(hc1_tmp.setCommand(new_cmd_1));
+
   JointHandle hc2_tmp = iface.getHandle(name2);
   EXPECT_EQ(name2, hc2_tmp.getName());
   EXPECT_DOUBLE_EQ(pos2, hc2_tmp.getPosition());

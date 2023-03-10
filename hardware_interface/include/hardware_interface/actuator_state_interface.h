@@ -76,12 +76,19 @@ public:
     {
       throw HardwareInterfaceException("Cannot create handle '" + name + "'. Effort data pointer is null.");
     }
-    if(pid_gains_ && (*pid_gains_).size() != 3)
+    if(pid_gains_ && pid_gains_->size() != 5)
     {
-      throw HardwareInterfaceException("Cannot create handle '" + name +
-                                       "'. The parsed PID gains pointer is not of size 3.");
+      throw HardwareInterfaceException(
+          "Cannot create handle '" + name + "'. The parsed PID gains pointer is of size: " +
+          std::to_string(pid_gains_->size()) + ". Expected size : 5");
     }
-
+    if (pid_gains_ && ff_term_ && pid_gains_->size() != ff_term_->size())
+    {
+      throw HardwareInterfaceException(
+          "Cannot create handle '" + name + "'. The parsed PID gains(" +
+          std::to_string(pid_gains_->size()) + ") and FF Term(" +
+          std::to_string(ff_term_->size()) + ") are not of same size.");
+    }
   }
 
   std::string getName() const {return name_;}
@@ -142,6 +149,24 @@ public:
     }
     else{
       return true;
+    }
+  }
+
+  bool hasPIDGains() const{
+    if(!pid_gains_){
+        return false;
+    }
+    else{
+        return true;
+    }
+  }
+
+  bool hasFFTerm() const{
+    if(!ff_term_){
+        return false;
+    }
+    else{
+        return true;
     }
   }
 
